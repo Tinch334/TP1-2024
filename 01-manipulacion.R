@@ -110,3 +110,34 @@ datos_reducido1 <-datos_orden %>%
 # Opción 2: por indexación
 datos_reducido2 <-datos_orden %>%
 	slice(1:500)
+
+####
+
+# Frecuencia de Recoleccion de residuos
+
+etiquetas <- c("0", "1", "2-4", "+5")
+
+ordenSemanas <- c("No hay servicio de recolección municipal",
+                  "Una vez a la semana",
+                  "Entre 2 y 4 veces a la semana",
+                  "Al menos 5 veces a la semana")
+
+# se le agrega una nueva columna al dataframe Base
+Base$FrecuenciaRecoleccion = factor(Base$`¿Con qué frecuencia el Municipio recolecta los residuos en sus inmediaciones?`,
+                                    levels = ordenSemanas, labels = etiquetas)
+####
+
+# Menores por vivienda
+tab.menoresPorVivienda <- table(Base$`¿Cuántas personas menores de 18 años hay en la vivienda?\n`)
+
+####
+
+# esta grafica seria la de respuesta multiple, igual no supe exactamente que graficar
+
+frame_plagas = data.frame(cucas = table(Base[, 92])[1],
+                          mosquitos = table(Base[, 93])[1], 
+                          ratas = table(Base[ ,94])[1])
+
+
+
+

@@ -1,6 +1,6 @@
 # Instalo los paquetes necesarios (si aún no los tengo instalados)
-# install.packages("tidyverse")
-# install.packages("ggplot2")
+ install.packages("tidyverse")
+ install.packages("ggplot2")
 
 # Cargo los paquetes que voy a usar
 library(tidyverse)
@@ -41,7 +41,14 @@ datos %>%
 
 	theme_classic() # Temas preconfigurados de R https://r-charts.com/ggplot2/themes/
 	
-	
+  # Frecuencias recoleccion
+ 
+ plot(x = Base$FrecuenciaRecoleccion, 
+      main = "Gráfica de Frecuencia de Recolección de Residuos",
+      xlab = "Recolecciones de residuos semanales", 
+      ylab = "Cantidad de familias",
+      col = "darkseagreen",
+      ylim = c(0, 500))
 
 ###########################################
 # Gráfico de barras a partir de una tabla #
@@ -83,8 +90,14 @@ ggplot(datos) +
 	labs(y = "Cantidad de árboles", 
 			 x = "Número de brotes nuevos")+
 	theme_classic()
+  
+ # Menores por vivienda
 
-
+ plot(x = tab.menoresPorVivienda, 
+      type="h",
+      main = "Grafica de Frecuencia de menores de edad por vivienda", 
+      xlab= "Numero de menores de edad", 
+      ylab = "Número de familias")
 
 
 ###########
@@ -139,3 +152,4 @@ ggplot(datos_limpios) +
 							         # El nivel por defecto puede conocerse con bw.nrd0(datos_limpios$altura)
 							 fill = "lightgray", col = "black") +
 	labs(x = "Altura (m)", y = "Densidad")
+
