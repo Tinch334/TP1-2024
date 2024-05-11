@@ -1,5 +1,5 @@
 # Instalo los paquetes necesarios (si aún no los tengo instalados)
-# install.packages("tidyverse")
+install.packages("tidyverse")
 
 # Cargo los paquetes que voy a usar
 library(tidyverse)
@@ -51,6 +51,8 @@ datos_limpios <- datos %>% # Los pipelines permiten encadenar acciones
 		# En los casos en los que se presenten ambas categorías además del NA
 		# correspondería trabajarlos como tres valores distintos (presencia,
 		# ausencia y faltante) y su tratamiento dependerá de lo que se desee hacer
+		
+		# (NA no suele indicar ausencia de atributo, sino que por algun motivo esa celda no tiene contenido)
 		
 		# Para condiciones ifelse múltiples puedo usar la función case_when
 		inclinacion_cate = case_when(inclinacion == 0 ~ "Sin inclinación",
