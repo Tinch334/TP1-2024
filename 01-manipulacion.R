@@ -1,143 +1,70 @@
-# Instalo los paquetes necesarios (si aún no los tengo instalados)
-install.packages("tidyverse")
+install.packages("dplyr")
 
-# Cargo los paquetes que voy a usar
-library(tidyverse)
-
-# Fijo el dataset
-attach(datos)
-
-######################
-# Renombrar columnas #
-######################
-colnames(datos) <- c("id","altura","diametro","inclinacion","edad","tiempo",
-										 "brotes","especie","follaje","origen","atracnosis",
-										 "roya","manchas","ampollas")
-
-###################
-# Modificar datos #
-###################
-datos_limpios <- datos %>% # Los pipelines permiten encadenar acciones
-	
-	mutate(   # Para crear nuevas variables y editar las ya existentes
-		
-		# Veo valores min y max de la variable para elegir una
-		# particion en intervalos apropiada
-		# min(altura)
-		# max(altura)
-		# sqrt(nrow(datos))
-		
-		# Creo una variable nueva, con la partición en intervalos de altura
-		altura_int = cut(altura,
-										 breaks = seq(from=0, to=50, by = 5),
-										 right = F),
-		
-		# Modifico las columnas de la variable de respuesta múltiple
-		# para dejarlas como indicadoras con valores 1 (en caso de presentar
-		# el atributo) y 0 (en caso de no presentarlo)
-		atracnosis = ifelse( atracnosis == "atracnosis", 1, 0 ),
-		roya = ifelse( roya == "roya", 1, 0 ),
-		manchas = ifelse( manchas == "manchas", 1, 0 ),
-		ampollas = ifelse( ampollas == "ampollas", 1, 0),
-		# Notar que los NA no entran dentro de la categoría "no presentar 
-		# el atributo", por lo que requieren un tratamiento particular:
-		
-		atracnosis = ifelse(is.na(atracnosis), 0, 1),
-		roya = ifelse(is.na(roya), 0, 1),
-		manchas = ifelse(is.na(manchas), 0, 1),
-		ampollas = ifelse(is.na(ampollas), 0, 1),
-		# Esto solo es correcto porque teníamos dos valores posibles en estas
-		# columnas: presencia de atributo (nombre de la plaga) y ausencia (NA).
-		# En los casos en los que se presenten ambas categorías además del NA
-		# correspondería trabajarlos como tres valores distintos (presencia,
-		# ausencia y faltante) y su tratamiento dependerá de lo que se desee hacer
-		
-		# (NA no suele indicar ausencia de atributo, sino que por algun motivo esa celda no tiene contenido)
-		
-		# Para condiciones ifelse múltiples puedo usar la función case_when
-		inclinacion_cate = case_when(inclinacion == 0 ~ "Sin inclinación",
-																 inclinacion < 15 ~ "Inclinación leve",
-																 inclinacion < 30 ~ "Inclinación moderada",
-																 TRUE ~ "Inclinación alta"),
-		
-		# Recodifico las etiquetas de una variable categórica
-		especie = recode(especie, "ala" = "Álamo",
-										 "casu" = "Casuarina",
-										 "euca" = "Eucalipto",
-										 "jaca" = "Jacarandá",
-										 "palo"  = "Palo borracho"),
-		
-		# Especifico ordinalidad a las categorías de una variable
-		tiempo = factor(tiempo,
-										levels = 1:5,
-										labels = c("Menos de 2 años", "Entre 2 y 5 años",
-																				 "Entre 5 y 10 años", "Entre 10 y 20 años",
-																				 "20 años o más"))
-
-	)
-
-##########################################
-# Seleccionar un subconjunto de columnas #
-##########################################
-
-# Opcion 1
-datos_chico1 <- datos_limpios %>%
-	select(   # Seleccionar las columnas que quiero conservar
-		id, altura, edad, follaje, inclinacion_cate
-	)
-
-# Opcion 2
-datos_chico2 <- datos_limpios %>%
-	select(   # Eliminar las columnas que no quiero conservar
-		-altura, -edad, -follaje, -inclinacion_cate
-	)
-
-# Opcion 3
-datos_orden <- datos_limpios %>%
-	select(   # Reordeno columnas
-		id, especie, tiempo, everything()
-	)
+library(dplyr)
 
 
-###########################################
-# Seleccionar un subconjunto de registros #
-###########################################
+#Renombramos otras columnas que pierden el nombre por tener la misma "cabeza", o que se piereden al leer el archivo
+names(datosBarrios)[1] = "PROVINCIA"
+names(datosBarrios)[2] = "BARRIO"
 
-# Opción 1: por criterio
-datos_reducido1 <-datos_orden %>%
-	filter((brotes > 4 & origen == "Nativo/Autóctono") | tiempo == "20 años o más")
+#Estos nombres son para conveniencia a futuro
+names(datosBarrios)[38] = "FCOCINA1"
+names(datosBarrios)[39] = "FCOCINA2"
+names(datosBarrios)[40] = "FCOCINA3"
+names(datosBarrios)[41] = "FCOCINA4"
 
-# Opción 2: por indexación
-datos_reducido2 <-datos_orden %>%
-	slice(1:500)
+names(datosBarrios)[43] = "FCALEFACCION1"
+names(datosBarrios)[44] = "FCALEFACCION2"
+names(datosBarrios)[45] = "FCALEFACCION3"
+names(datosBarrios)[46] = "FCALEFACCION4"
+names(datosBarrios)[47] = "FCALEFACCION5"
 
-####
+names(datosBarrios)[73] = "PHUMEDAD1"
+names(datosBarrios)[74] = "PHUMEDAD2"
+names(datosBarrios)[75] = "PHUMEDAD3"
+names(datosBarrios)[76] = "PHUMEDAD4"
+names(datosBarrios)[77] = "PHUMEDAD5"
 
-# Frecuencia de Recoleccion de residuos
+names(datosBarrios)[79] = "PESTRUCTURALES1"
+names(datosBarrios)[80] = "PESTRUCTURALES2"
+names(datosBarrios)[81] = "PESTRUCTURALES3"
+names(datosBarrios)[82] = "PESTRUCTURALES4"
+names(datosBarrios)[83] = "PESTRUCTURALES5"
 
-etiquetas <- c("0", "1", "2-4", "+5")
 
-ordenSemanas <- c("No hay servicio de recolección municipal",
-                  "Una vez a la semana",
-                  "Entre 2 y 4 veces a la semana",
-                  "Al menos 5 veces a la semana")
+#Colapsamos las respuestas ubicadas en multiples columnas a solo 1.
+datosBarrios$`¿Qué fuentes de energía utilizan para cocinar en su vivienda?` <- coalesce(
+  datosBarrios$`¿Qué fuentes de energía utilizan para cocinar en su vivienda?`,
+  datosBarrios$FCOCINA1,
+  datosBarrios$FCOCINA2,
+  datosBarrios$FCOCINA3,
+  datosBarrios$FCOCINA4
+)
 
-# se le agrega una nueva columna al dataframe Base
-Base$FrecuenciaRecoleccion = factor(Base$`¿Con qué frecuencia el Municipio recolecta los residuos en sus inmediaciones?`,
-                                    levels = ordenSemanas, labels = etiquetas)
-####
+datosBarrios$`¿Cuál es la principal fuente de energía que utiliza para calefaccionar la vivienda?` <- coalesce(
+  datosBarrios$`¿Cuál es la principal fuente de energía que utiliza para calefaccionar la vivienda?`,
+  datosBarrios$FCALEFACCION1,
+  datosBarrios$FCALEFACCION2,
+  datosBarrios$FCALEFACCION3,
+  datosBarrios$FCALEFACCION4,
+  datosBarrios$FCALEFACCION5,
+)
 
-# Menores por vivienda
-tab.menoresPorVivienda <- table(Base$`¿Cuántas personas menores de 18 años hay en la vivienda?\n`)
-
-####
-
-# esta grafica seria la de respuesta multiple, igual no supe exactamente que graficar
-
-frame_plagas = data.frame(cucas = table(Base[, 92])[1],
-                          mosquitos = table(Base[, 93])[1], 
-                          ratas = table(Base[ ,94])[1])
+#Su vivienda, ¿posee problemas de humedad graves y/o filtraciones?
 
 
 
+#Eliminamos las columnas adicionales donde estaban las respuestas del punto anterior.
+datosBarrios$FCOCINA1 <- NULL
+datosBarrios$FCOCINA2 <- NULL
+datosBarrios$FCOCINA3 <- NULL
+datosBarrios$FCOCINA4 <- NULL
 
+datosBarrios$FCALEFACCION1 <- NULL
+datosBarrios$FCALEFACCION2 <- NULL
+datosBarrios$FCALEFACCION3 <- NULL
+datosBarrios$FCALEFACCION4 <- NULL
+datosBarrios$FCALEFACCION5 <- NULL
+
+# Ver estructura del dataset (como planilla)
+View(datosBarrios)
