@@ -9,6 +9,7 @@ library(janitor)
 # Fijo el dataset
 attach(datos_limpios)
 
+view(datos_limpios)
 ###########################
 # Tablas usando tidyverse #
 ###########################
