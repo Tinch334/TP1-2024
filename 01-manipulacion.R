@@ -3,68 +3,52 @@ install.packages("dplyr")
 library(dplyr)
 
 
+coalesce_columnas <- function(frame, indice_inicial, cantidad) {
+  #Primero creamos un vector con todas las columnas a "juntar".
+  columnas <- c()
+  
+  for (i in indice_inicial:(indice_inicial + cantidad - 1)) {
+    columnas <- append(columnas, frame[i])
+  }
+  
+  #Hacemos un coalesce, es decir juntamos las columnas. Los signos de exclamacion
+  #son para que R evalue la lista antes de llamar a la funcion con ese argumento
+  #evitando un error(Creo).
+  frame[indice_inicial] <- coalesce(!!!columnas)
+  
+  return(frame)
+}
+
+suma_no_nula<- function(frame, indice_resultado, indice_inicial_suma, cantidad) {
+  #Voy por las columnas especificadas, si una celda es nula la transformo en cero,
+  #de lo contrario en 1. Seria mejor hacer esto con lapply, no pude hacerlo funcionar.
+  for (i in indice_inicial_suma:(indice_inicial_suma + cantidad - 1)) {
+    frame[i] <- sapply(frame[i], function(x) ifelse(is.na(x), 0, 1))
+  }
+
+  frame[indice_resultado] <-
+    rowSums(frame[, indice_inicial_suma:(indice_inicial_suma + cantidad - 1)])
+    
+  return(frame)
+}
+
+
 #Renombramos otras columnas que pierden el nombre por tener la misma "cabeza", o que se piereden al leer el archivo
 names(datosBarrios)[1] = "PROVINCIA"
 names(datosBarrios)[2] = "BARRIO"
 
-#Estos nombres son para conveniencia a futuro
-names(datosBarrios)[38] = "FCOCINA1"
-names(datosBarrios)[39] = "FCOCINA2"
-names(datosBarrios)[40] = "FCOCINA3"
-names(datosBarrios)[41] = "FCOCINA4"
-
-names(datosBarrios)[43] = "FCALEFACCION1"
-names(datosBarrios)[44] = "FCALEFACCION2"
-names(datosBarrios)[45] = "FCALEFACCION3"
-names(datosBarrios)[46] = "FCALEFACCION4"
-names(datosBarrios)[47] = "FCALEFACCION5"
-
-names(datosBarrios)[73] = "PHUMEDAD1"
-names(datosBarrios)[74] = "PHUMEDAD2"
-names(datosBarrios)[75] = "PHUMEDAD3"
-names(datosBarrios)[76] = "PHUMEDAD4"
-names(datosBarrios)[77] = "PHUMEDAD5"
-
-names(datosBarrios)[79] = "PESTRUCTURALES1"
-names(datosBarrios)[80] = "PESTRUCTURALES2"
-names(datosBarrios)[81] = "PESTRUCTURALES3"
-names(datosBarrios)[82] = "PESTRUCTURALES4"
-names(datosBarrios)[83] = "PESTRUCTURALES5"
-
-
 #Colapsamos las respuestas ubicadas en multiples columnas a solo 1.
-datosBarrios$`¿Qué fuentes de energía utilizan para cocinar en su vivienda?` <- coalesce(
-  datosBarrios$`¿Qué fuentes de energía utilizan para cocinar en su vivienda?`,
-  datosBarrios$FCOCINA1,
-  datosBarrios$FCOCINA2,
-  datosBarrios$FCOCINA3,
-  datosBarrios$FCOCINA4
-)
 
-datosBarrios$`¿Cuál es la principal fuente de energía que utiliza para calefaccionar la vivienda?` <- coalesce(
-  datosBarrios$`¿Cuál es la principal fuente de energía que utiliza para calefaccionar la vivienda?`,
-  datosBarrios$FCALEFACCION1,
-  datosBarrios$FCALEFACCION2,
-  datosBarrios$FCALEFACCION3,
-  datosBarrios$FCALEFACCION4,
-  datosBarrios$FCALEFACCION5,
-)
+# datosBarrios$`¿Qué fuentes de energía utilizan para cocinar en su vivienda?` <-
+#   coalesce_columnas(datosBarrios, 37, 5)
 
-#Su vivienda, ¿posee problemas de humedad graves y/o filtraciones?
+datosBarrios <- coalesce_columnas(datosBarrios, 37, 5)
 
+datosBarrios <- coalesce_columnas(datosBarrios, 42, 6)
 
+datosBarrios <- suma_no_nula(datosBarrios, 72, 72, 4)
 
-#Eliminamos las columnas adicionales donde estaban las respuestas del punto anterior.
-datosBarrios$FCOCINA1 <- NULL
-datosBarrios$FCOCINA2 <- NULL
-datosBarrios$FCOCINA3 <- NULL
-datosBarrios$FCOCINA4 <- NULL
-
-datosBarrios$FCALEFACCION1 <- NULL
-datosBarrios$FCALEFACCION2 <- NULL
-datosBarrios$FCALEFACCION3 <- NULL
-datosBarrios$FCALEFACCION4 <- NULL
-datosBarrios$FCALEFACCION5 <- NULL
+datosBarrios <- suma_no_nula(datosBarrios, 78, 78, 4)
 
 # Ver estructura del dataset (como planilla)
 View(datosBarrios)
