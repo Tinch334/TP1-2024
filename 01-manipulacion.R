@@ -1,6 +1,8 @@
 install.packages("dplyr")
 
 library(dplyr)
+# para utilizar funciones con manejo de strings
+library(stringr)
 
 
 coalesce_columnas <- function(frame, indice_inicial, cantidad) {

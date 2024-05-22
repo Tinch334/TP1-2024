@@ -48,24 +48,32 @@ datos %>%
 # Crear el gráfico de barras horizontales (ordenado segun frecuencia de plagas)
 
 
-ggplot(plagas_acumuladas, aes(x = reorder(Plaga, -Cantidad), y = Cantidad)) +
+graficoPlagasFrecuentes <-
+  ggplot(plagas_acumuladas, aes(x = reorder(Plaga, -Cantidad), y = Cantidad)) +
   geom_bar(stat = "identity", fill = "tan2", col="black", width=0.5) +
   labs(title = "Plagas mas frecuentes",
        x = "Plagas",
        y = "Cantidad") +
-  theme_classic() +
   # barras horizontales para mejor interpretacion en la lectura
   coord_flip() +
-  scale_y_continuous(limits = c(0, 625), breaks = seq(0, 625, by = 100))
+  scale_y_continuous(limits = c(0, 625), breaks = seq(0, 625, by = 100))+
+  theme_bw()
+
+graficoPlagasFrecuentes
 
 
+graficoDistrTiposHacinamiento <-
   ggplot(datosBarrios, aes(x = tipo_hacinamiento)) +
-  geom_bar(fill = "skyblue", color = "black") +
+  geom_bar(fill = "deepskyblue", color = "black") +
   labs(title = "Distribución de Hacinamiento",
        x = "Tipo de hacinamiento",
        y = "Cantidad de Familias") +
-  theme_classic() +
+  theme_bw() +
   scale_y_continuous(limits = c(0, 750), breaks = seq(0, 750, by = 100))
+
+graficoDistrTiposHacinamiento
+
+
 
  ###########################################
 # Gráfico de barras a partir de una tabla #
@@ -110,14 +118,18 @@ datosBarrios$cant_menores_de_edad_del_hogar <- as.factor(datosBarrios$cant_menor
 max_y_value <- max(table(datosBarrios$cant_menores_de_edad_del_hogar)) * 1.1
  
  
-ggplot(datosBarrios) +
+graficaMenoresPorVivienda <- 
+   ggplot(datosBarrios) +
    ggtitle("Frecuencia de menores de edad por vivienda") +
    aes(x = cant_menores_de_edad_del_hogar) + 
-   geom_bar(width = 0.1, fill = "darkblue") +
+   geom_bar(width = 0.16, fill = "lightblue4") +
    scale_y_continuous(limits = c(0, max_y_value)) +
    labs(y = "Número de familias", 
         x = "Número de menores de edad") +
-   theme_classic()
+   theme_bw()
+
+graficaMenoresPorVivienda
+
 
 
 #######################
@@ -125,15 +137,18 @@ ggplot(datosBarrios) +
 #######################
 
 # Crear el gráfico de torta
-ggplot(familia_posee_recoleccion_muni, aes(x = "", y = Cantidad, fill = Categoria)) +
+graficaFamiliaPoseeRMuni <- 
+  ggplot(familia_posee_recoleccion_muni, aes(x = "", y = Cantidad, fill = Categoria)) +
   geom_bar(stat = "identity", width = 1) +
   coord_polar(theta = "y") +
   labs(title = "Disposición de familias de recoleccion de residuos municipales",
        fill = "",
        x = "",
        y = "") +
-  scale_fill_manual(values = c("bisque4", "chartreuse3"))
-  theme_classic()
+  scale_fill_manual(values = c("cadetblue", "dodgerblue3")) +
+  theme_bw()
+
+graficaFamiliaPoseeRMuni
 
 
 ###########
@@ -189,3 +204,10 @@ ggplot(datos_limpios) +
 							 fill = "lightgray", col = "black") +
 	labs(x = "Altura (m)", y = "Densidad")
 
+
+## Descarga de graficas (capaz poner esto en un archivo aparte(?))
+## Formato png
+ggsave("graficos/graficoPlagasFrecuentes.png", graficoPlagasFrecuentes)
+ggsave("graficos/graficoDistrTiposHacinamiento.png", graficoDistrTiposHacinamiento)
+ggsave("graficos/graficoMenoresVivienda.png", graficaMenoresPorVivienda)
+ggsave("graficos/graficaFamiliaPoseeRMuni.png", graficaFamiliaPoseeRMuni)
