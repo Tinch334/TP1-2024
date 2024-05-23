@@ -4,37 +4,6 @@ library(dplyr)
 # para utilizar funciones con manejo de strings
 library(stringr)
 
-
-coalesce_columnas <- function(frame, indice_inicial, cantidad) {
-  #Primero creamos un vector con todas las columnas a "juntar".
-  columnas <- c()
-  
-  for (i in indice_inicial:(indice_inicial + cantidad - 1)) {
-    columnas <- append(columnas, frame[i])
-  }
-  
-  #Hacemos un coalesce, es decir juntamos las columnas. Los signos de exclamacion
-  #son para que R evalue la lista antes de llamar a la funcion con ese argumento
-  #evitando un error(Creo).
-  frame[indice_inicial] <- coalesce(!!!columnas)
-  
-  return(frame)
-}
-
-suma_no_nula<- function(frame, indice_resultado, indice_inicial_suma, cantidad) {
-  #Voy por las columnas especificadas, si una celda es nula la transformo en cero,
-  #de lo contrario en 1. Seria mejor hacer esto con lapply, no pude hacerlo funcionar.
-  for (i in indice_inicial_suma:(indice_inicial_suma + cantidad - 1)) {
-    frame[i] <- sapply(frame[i], function(x) ifelse(is.na(x), 0, 1))
-  }
-
-  frame[indice_resultado] <-
-    rowSums(frame[, indice_inicial_suma:(indice_inicial_suma + cantidad - 1)])
-    
-  return(frame)
-}
-
-
 # Renombramos otras columnas que pierden el nombre por tener la misma "cabeza", o que se piereden al leer el archivo
 names(datosBarrios)[1] = "PROVINCIA"
 names(datosBarrios)[2] = "BARRIO"
@@ -47,6 +16,8 @@ names(datosBarrios)[13] = "num_max_pers_duermen_por_dormitorio"
 names(datosBarrios)[92] = "cucas"
 names(datosBarrios)[93] = "mosquitos"
 names(datosBarrios)[94] = "ratas"
+names(datosBarrios)[113] = "basural_cerca"
+names(datosBarrios)[115] = "forma_eliminacion_residuos"
 names(datosBarrios)[116] = "frec_recoleccion_basura_municipal"
 
 
@@ -71,24 +42,60 @@ unificar_plagas <- function(row) {
   }
 }
 
+# Crear una función para combinar si una familia tiene plagas o no
+unificar_plagas_numerico <- function(row) {
+  if (row["presencia_plagas"] == "No tiene plagas") {
+    return(0)
+  }
+  else {
+    return(str_count(row["presencia_plagas"], "/") + 1)
+  }
+}
+
+unificar_basural <- function(row) {
+  if (row["basural_cerca"] != "No") {
+    return("No")
+  }
+  else {
+    return("Si")
+  }
+}
+
+freq_recoleccion_a_dias <- function(row) {
+  if (row["frec_recoleccion_basura_municipal"] == "Una vez a la semana") {
+    return(1)
+  }
+  else if (row["frec_recoleccion_basura_municipal"] == "Entre 2 y 4 veces a la semana") {
+    return(floor(runif(n = 1, min = 2, max = 5)))    
+  }
+  else if (row["frec_recoleccion_basura_municipal"] == "Al menos 5 veces a la semana") {
+    return(floor(runif(n = 1, min = 5, max = 8)))
+  }
+  else {
+    return(0)
+  }
+}
+
+
 # aplicar funcion a cada columna del df
 datosBarrios$presencia_plagas <- apply(datosBarrios, 1, unificar_plagas)
- 
- 
+
+datosBarrios$cerca_basural <- apply(datosBarrios, 1, unificar_basural)
+
 contar_plagas <- function(plaga, datos) {
   ocurrencias <- str_count(datos$presencia_plagas, plaga)
   return(sum(ocurrencias))
 }
 
 # Contar las ocurrencias de cada plaga
-cucarachas <- contar_plagas("Cucarachas", datosBarrios)
-mosquitos <- contar_plagas("Mosquitos", datosBarrios)
-ratas <- contar_plagas("Ratas", datosBarrios)
+cucarachas_cant <- contar_plagas("Cucarachas", datosBarrios)
+mosquitos_cant <- contar_plagas("Mosquitos", datosBarrios)
+ratas_cant <- contar_plagas("Ratas", datosBarrios)
 
 # Crear un dataframe con los resultados
 plagas_acumuladas <- data.frame(
   Plaga = c("Cucarachas", "Mosquitos", "Ratas"),
-  Cantidad = c(cucarachas, mosquitos, ratas)
+  Cantidad = c(cucarachas_cant, mosquitos_cant, ratas_cant)
 )
 
 # Mostrar el dataframe
@@ -108,24 +115,56 @@ familias_sin_rec_muni <- apariciones_cadena(datosBarrios, "frec_recoleccion_basu
 familias_con_rec_muni <- sum(!is.na(datosBarrios["frec_recoleccion_basura_municipal"])) - familias_sin_rec_muni
 
 
-print(familias_sin_rec_muni )
-print(familias_con_rec_muni )
-# una vez teniendo los datos, armar el dataframe
+eliminacion_residuos_transporte_propio <-
+  apariciones_cadena(datosBarrios, "forma_eliminacion_residuos", "El traslado de la basura al exterior del barrio queda a cuenta de cada vecine y/o se realiza por lxs propixs vecinxs")
+eliminacion_residuos_quema <-
+  apariciones_cadena(datosBarrios, "forma_eliminacion_residuos", "Quemamos basura en mi domicilio")
+eliminacion_residuos_basural <-
+  apariciones_cadena(datosBarrios, "forma_eliminacion_residuos", "Basural a cielo abierto dentro del mismo barrio (o adyacente)")
 
+# una vez teniendo los datos, armar el dataframe
 familia_posee_recoleccion_muni <- data.frame(
   Categoria = c("Familias que poseen", "Familias que no poseen"),
   Cantidad = c(familias_con_rec_muni, familias_sin_rec_muni)
 )
+
 View(familia_posee_recoleccion_muni)
+
+eliminacion_residuos_no_recoleccion_muni <- data.frame(
+  Categoria = c("Traslado propio", "Quema en el domicilio", "Basural a cielo abierto"),
+  Cantidad = c(eliminacion_residuos_transporte_propio, eliminacion_residuos_quema, eliminacion_residuos_basural)
+)
+
+View(eliminacion_residuos_no_recoleccion_muni)
+
+datosBarrios$recoleccion_residuos_en_dias <- apply(datosBarrios, 1, freq_recoleccion_a_dias)
+datosBarrios$presencia_plagas_numerico <- apply(datosBarrios, 1, unificar_plagas_numerico)
+
+
+plagas_y_recoleccion <- data.frame(
+  CantidadPlagas = datosBarrios$presencia_plagas_numerico,
+  FreqRecoleccion = datosBarrios$recoleccion_residuos_en_dias
+)
+# plagas_y_recoleccion <- data.frame(
+#   CantidadPlagas = c(0, 0, 0, 0, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3),
+#   FreqRecoleccion = c(1, 3, 3, 3, 3, 6, 6, 1, 3, 1, 1, 3, 3, 1, 6, 6, 3, 1, 1)
+# )
+
+View(plagas_y_recoleccion)
+
+plagas_y_recoleccion <-
+  plagas_y_recoleccion[plagas_y_recoleccion$FreqRecoleccion != 0,]
+
+View(plagas_y_recoleccion)
 
 # Promedio de personas por habitacion
 # somos cuidadosos de no dividir celdas con NA o con 0 en el denominador
 datosBarrios$promedio_personas_por_habitacion <- ifelse(!is.na(datosBarrios$num_integrantes_vivienda) &
-                                                        !is.na(datosBarrios$num_ambientes_usados_como_dormitorio) &
-                                                        datosBarrios$num_ambientes_usados_como_dormitorio != 0,
+                                                          !is.na(datosBarrios$num_ambientes_usados_como_dormitorio) &
+                                                          datosBarrios$num_ambientes_usados_como_dormitorio != 0,
                                                         datosBarrios$num_integrantes_vivienda / datosBarrios$num_ambientes_usados_como_dormitorio,
                                                         NA
-                                                        )
+)
 
 
 
@@ -134,25 +173,8 @@ datosBarrios$promedio_personas_por_habitacion <- ifelse(!is.na(datosBarrios$num_
 # sino, hacinamiento critico
 
 datosBarrios$tipo_hacinamiento <- cut(datosBarrios$promedio_personas_por_habitacion,
-                                 breaks = c(0, 2, 4.99, Inf),
-                                 labels = c("no posee", "moderado", "crítico"),
-                                 right = TRUE)
+                                      breaks = c(0, 2, 4.99, Inf),
+                                      labels = c("no posee", "moderado", "crítico"),
+                                      right = TRUE)
 
-View(datosBarrios)
-
-
-#Colapsamos las respuestas ubicadas en multiples columnas a solo 1.
-
-# datosBarrios$`¿Qué fuentes de energía utilizan para cocinar en su vivienda?` <-
-#   coalesce_columnas(datosBarrios, 37, 5)
-
-datosBarrios <- coalesce_columnas(datosBarrios, 37, 5)
-
-datosBarrios <- coalesce_columnas(datosBarrios, 42, 6)
-
-datosBarrios <- suma_no_nula(datosBarrios, 72, 72, 4)
-
-datosBarrios <- suma_no_nula(datosBarrios, 78, 78, 4)
-
-# Ver estructura del dataset (como planilla)
 View(datosBarrios)
