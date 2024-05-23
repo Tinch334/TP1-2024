@@ -21,7 +21,7 @@ attach(datosBarrios)
 
 graficoPlagasFrecuentes <-
   ggplot(plagas_acumuladas, aes(x = reorder(Plaga, -Cantidad), y = Cantidad)) +
-  geom_bar(stat = "identity", fill = "tan2", col="black", width=0.5) +
+  geom_bar(stat = "identity", fill = "bisque", width=0.5) +
   labs(title = "Plagas mas frecuentes",
        x = "Plagas",
        y = "Cantidad") +
@@ -35,7 +35,7 @@ graficoPlagasFrecuentes
 
 graficoDistrTiposHacinamiento <-
   ggplot(datosBarrios, aes(x = tipo_hacinamiento)) +
-  geom_bar(fill = "deepskyblue", color = "black") +
+  geom_bar(fill = "bisque") +
   labs(title = "Distribución de Hacinamiento",
        x = "Tipo de hacinamiento",
        y = "Cantidad de Familias") +
@@ -52,6 +52,7 @@ graficoDistrTiposHacinamiento
 graficoRelPlagasCieloAbierto <- 
   ggplot(datosBarrios, aes(x = cerca_basural, fill = presencia_plagas_simplificado)) +
   geom_bar() +
+  scale_fill_manual(values=c("bisque", "coral2")) +
   labs(title = "Relacion entre plagas y cercania a un basural",
        x = "Esta a menos de 2km de un basural",
        y = "Frecuencia",
@@ -75,7 +76,7 @@ graficaMenoresPorVivienda <-
   ggplot(datosBarrios) +
   ggtitle("Frecuencia de menores de edad por vivienda") +
   aes(x = cant_menores_de_edad_del_hogar) + 
-  geom_bar(width = 0.16, fill = "lightblue4") +
+  geom_bar(width = 0.3, fill = "bisque") +
   scale_y_continuous(limits = c(0, max_y_value)) +
   labs(y = "Número de familias", 
        x = "Número de menores de edad") +
@@ -98,7 +99,7 @@ graficaFamiliaPoseeRMuni <-
        fill = "",
        x = "",
        y = "") +
-  scale_fill_manual(values = c("cadetblue", "dodgerblue3")) +
+  scale_fill_manual(values = c("bisque", "coral2")) +
   theme_bw()
 
 graficaFamiliaPoseeRMuni
@@ -112,7 +113,7 @@ graficaEliminacionPropiaResiduos <-
        fill = "",
        x = "",
        y = "") +
-  scale_fill_manual(values = c("cadetblue", "dodgerblue3", "navyblue")) +
+  scale_fill_manual(values = c("bisque", "coral2", "darksalmon")) +
   theme_bw()
 
 graficaEliminacionPropiaResiduos
@@ -121,15 +122,19 @@ graficaEliminacionPropiaResiduos
 ###################
 # Gráfico Boxplot #
 ###################
-plagas_y_recoleccion$CantidadPlagas <-
-  factor(plagas_y_recoleccion$CantidadPlagas)
-
 View(plagas_y_recoleccion)
 
 graficaPlagasYRecoleccion <-
-  ggplot(plagas_y_recoleccion, aes(x = CantidadPlagas, y = FreqRecoleccion)) + 
-  geom_boxplot() +
-  geom_jitter()
+  ggplot(plagas_y_recoleccion, 
+         aes(x = plagas_y_recoleccion$FreqRecoleccion,
+        y = factor(plagas_y_recoleccion$CantidadPlagas))) + 
+  geom_boxplot(fill = "bisque") +
+  geom_jitter() +
+  labs(title = "Relacion entre la cantidad de plagas y la recoleccion de resiudos",
+       fill = "",
+       x = "Frequencia de recoleccion",
+       y = "Cantidad de plagas") +
+  scale_fill_manual(values = c("bisque"))
 
 graficaPlagasYRecoleccion
 
