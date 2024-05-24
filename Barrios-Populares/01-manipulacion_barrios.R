@@ -76,21 +76,6 @@ unificar_basural <- function(row) {
   }
 }
 
-freq_recoleccion_a_dias <- function(row) {
-  if (row["frec_recoleccion_basura_municipal"] == "Una vez a la semana") {
-    return(1)
-  }
-  else if (row["frec_recoleccion_basura_municipal"] == "Entre 2 y 4 veces a la semana") {
-    return(floor(runif(n = 1, min =2, max = 5)))    
-  }
-  else if (row["frec_recoleccion_basura_municipal"] == "Al menos 5 veces a la semana") {
-    return(floor(runif(n = 1, min = 5, max = 8)))
-  }
-  else {
-    return(0)
-  }
-}
-
 freq_recoleccion_simplificado <- function(valor) {
   if (valor == "No hay servicio de recolección municipal") {
     return("no posee")
@@ -102,6 +87,19 @@ freq_recoleccion_simplificado <- function(valor) {
     return("+5")
   } else {
     return(valor)
+  }
+}
+
+tipo_pared_simplificada <- function(tipoPared) {
+  if (tipoPared == "Planchón (describir qué es)") {
+    return ("Planchón")
+  } else if (tipoPared == "Mampostería (ladrillo/block") {
+    return ("Mampostería")
+  } else if (tipoPared == "Trama en madera/tapial de madera") {
+    return ("Madera/Tapial")
+  } else {
+    # para adobe y chapa, el string ya esta limpio, dejarlo asi
+    return (tipoPared)
   }
 }
 
@@ -223,5 +221,11 @@ plagas_y_recoleccion$FreqRecoleccion <- factor(plagas_y_recoleccion$FreqRecolecc
 datos_alquiler <- datosBarrios[!is.na(datosBarrios$precio_alquiler), ]
 
 print(plagas_y_recoleccion)
+
+
+
+datosBarrios$Tipo_Pared <- sapply(datosBarrios$`Respecto a las paredes exteriores de su vivienda, ¿de qué material están construidas principalmente?`, tipo_pared_simplificada)
+
+
 View(datosBarrios)
 

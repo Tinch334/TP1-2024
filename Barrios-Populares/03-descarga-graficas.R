@@ -6,11 +6,9 @@ ggsave("Barrios-Populares/graficos/graficaPlagasFrecuentes.png", graficaPlagasFr
 ggsave("Barrios-Populares/graficos/graficaDistrTiposHacinamiento.png", graficaDistrTiposHacinamiento)
 ggsave("Barrios-Populares/graficos/graficaMenoresVivienda.png", graficaMenoresPorVivienda)
 ggsave("Barrios-Populares/graficos/graficaFamiliaPoseeRMuni.png", graficaFamiliaPoseeRMuni)
-ggsave("Barrios-Populares/graficos/graficaRelPlagasCieloAbierto.png", graficaRelPlagasCieloAbierto)
+ggsave("Barrios-Populares/graficos/graficaRelPlagasCercaniaBasural.png", graficaRelPlagasCercaniaBasural)
 ggsave("Barrios-Populares/graficos/graficaEliminacionPropiaResiduos.png", graficaEliminacionPropiaResiduos)
-ggsave("Barrios-Populares/graficos/graficaCantPlagasSegunRec.png", graficaCantPlagasSegunRec)
 ggsave("Barrios-Populares/graficos/graficaPrecioAlquilerSegunCantPlagas.png", graficaPrecioAlquilerSegunCantPlagas)
-
-
-#ggsave("Barrios-Populares/graficos/graficaPlagasYRecoleccion.png", graficaPlagasYRecoleccion)
+ggsave("Barrios-Populares/graficos/graficaRelPlagasMatPared.png", graficaRelPlagasMatPared)
+ggsave("Barrios-Populares/graficos/graficaRelPlagasMatPiso.png", graficaRelPlagasMatPiso)
 
