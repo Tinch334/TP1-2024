@@ -1,6 +1,6 @@
 # Instalo los paquetes necesarios (si aún no los tengo instalados)
-# install.packages("googledrive")
-# install.packages("readxl")
+ install.packages("googledrive")
+ install.packages("readxl")
 
 # Descargo el archivo mediante su id de google drive
 # El link de los archivos de drive tiene esta forma:

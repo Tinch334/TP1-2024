@@ -24,7 +24,7 @@ graficaPlagasFrecuentes <-
        x = "Plagas",
        y = "Cantidad de familias que poseen la plaga",
        caption = "Observatorio Villero, La Poderosa (2022)") +
-  # barras horizontales para mejor interpretacion en la lectura
+# invertir ejes para mejor interpretacion en la lectura
   coord_flip() +
   scale_y_continuous(limits = c(0, 625), breaks = seq(0, 625, by = 100))+
   theme_bw()
@@ -77,7 +77,6 @@ graficaRelPlagasMatPared <- ggplot(datosBarrios, aes(x = Tipo_Pared, fill = pres
 
 graficaRelPlagasMatPared
 
-# poner labels como van
 graficaRelPlagasMatPiso <- ggplot(datosBarrios, aes(x = datosBarrios$"¿De qué material está hecho el piso (revestimiento) de su vivienda?", fill = presencia_plagas_simplificado)) +
   geom_bar() +
   labs(title = "Relación entre el Tipo de material del Piso y la Presencia de Plagas",
@@ -90,6 +89,20 @@ graficaRelPlagasMatPiso <- ggplot(datosBarrios, aes(x = datosBarrios$"¿De qué 
   theme_bw()
 
 graficaRelPlagasMatPiso
+
+
+graficaRelRecoleccionPlagas <- ggplot(plagas_y_recoleccion, aes(x = FreqRecoleccion, fill = CantidadPlagas)) +
+  geom_bar() +
+  labs(title = "Relación entre frecuencia recoleccion y presencia plagas",
+       x = "Frecuencia de recolección semanal",
+       y = "Número de Familias",
+       fill = "Posee plagas",
+       caption = "Observatorio Villero, La Poderosa (2022)") +
+  scale_fill_manual(values = c("No tiene plagas" = "#b0a18e", "Tiene plagas" = "#a37457")) +
+  scale_y_continuous(limits = c(0, 500), breaks = seq(0, 500, by = 50))+
+  theme_bw()
+
+graficaRelRecoleccionPlagas
 
 #######################
 # Gráfico de bastones #
@@ -138,7 +151,7 @@ graficaEliminacionPropiaResiduos <-
   ggplot(eliminacion_residuos_no_recoleccion_muni, aes(x = "", y = Cantidad, fill = Categoria)) +
   geom_bar(stat = "identity", width = 1, color="black") +
   coord_polar(theta = "y") +
-  labs(title = "Eliminacion de residuos por cuenta propia",
+  labs(title = "Métodos de eliminacion de residuos de vecinos sin recoleccion municipal",
        fill = "",
        x = "",
        y = "",
@@ -152,15 +165,39 @@ graficaEliminacionPropiaResiduos
 ###################
 # Gráfico Boxplot #
 ###################
-
 graficaPrecioAlquilerSegunCantPlagas <- 
   ggplot(datos_alquiler, aes(x = factor(presencia_plagas_numerico), y = precio_alquiler)) +
   geom_boxplot(fill = "bisque", color = "black") +
-  labs(title = "Relación entre precio del alquiler y numero de plagas",
+  labs(title = "Relación entre precio del alquiler y número de plagas",
        x = "Número de Plagas",
        y = "Precio del Alquiler ($ARS)",
        caption = "Observatorio Villero, La Poderosa (2022)") +
+  #geom_jitter()+
+  scale_y_continuous(limits = c(0, 30100), breaks = seq(0, 30100, by = 2500))+
   theme_bw()
 
 graficaPrecioAlquilerSegunCantPlagas
 
+
+graficaPrecioAlquilerSegunCantPlagas_Valores <- 
+  ggplot(datos_alquiler, aes(x = factor(presencia_plagas_numerico), y = precio_alquiler)) +
+  geom_boxplot(fill = "bisque", color = "black") +
+  stat_summary(fun = min, geom = "text",
+               aes(label = round(..y.., 2)),
+               vjust = 1.5, size = 4, color = "black",
+               position = position_dodge(width = 0.75)) +  # minimo
+  stat_summary(fun = max, geom = "text",
+               aes(label =round(..y.., 2)),
+               vjust = -0.5, size = 4, color = "black",
+               position = position_dodge(width = 0.75)) +  # mediana
+  stat_summary(fun = median, geom = "text", aes(label = round(..y.., 2)),
+               vjust = -1, size = 4, color = "black",
+               position = position_dodge(width = 0.75)) +  # maximo
+  labs(title = "Relación entre precio del alquiler y número de plagas",
+       x = "Número de Plagas",
+       y = "Precio del Alquiler ($ARS)",
+       caption = "Observatorio Villero, La Poderosa (2022)") +
+  
+  scale_y_continuous(limits = c(0, 30100), breaks = seq(0, 30100, by = 2500))+
+  theme_bw()
+graficaPrecioAlquilerSegunCantPlagas_Valores

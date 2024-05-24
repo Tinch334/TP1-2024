@@ -108,3 +108,4 @@ datos_reducido1 <-datos_orden %>%
 # Opción 2: por indexación
 datos_reducido2 <-datos_orden %>%
 	slice(1:500)
+
