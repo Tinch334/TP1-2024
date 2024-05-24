@@ -52,6 +52,15 @@ unificar_plagas_numerico <- function(row) {
   }
 }
 
+unificar_plagas_simplificado <- function(row) {
+  if (row["presencia_plagas"] == "No tiene plagas") {
+    return("No tiene plagas")
+  }
+  else {
+    return("Tiene plagas")
+  }
+}
+
 unificar_basural <- function(row) {
   if (row["basural_cerca"] != "No") {
     return("No")
@@ -66,7 +75,7 @@ freq_recoleccion_a_dias <- function(row) {
     return(1)
   }
   else if (row["frec_recoleccion_basura_municipal"] == "Entre 2 y 4 veces a la semana") {
-    return(floor(runif(n = 1, min = 2, max = 5)))    
+    return(floor(runif(n = 1, min =2, max = 5)))    
   }
   else if (row["frec_recoleccion_basura_municipal"] == "Al menos 5 veces a la semana") {
     return(floor(runif(n = 1, min = 5, max = 8)))
@@ -79,6 +88,8 @@ freq_recoleccion_a_dias <- function(row) {
 
 # aplicar funcion a cada columna del df
 datosBarrios$presencia_plagas <- apply(datosBarrios, 1, unificar_plagas)
+
+datosBarrios$presencia_plagas_simplificado <- apply(datosBarrios, 1, unificar_plagas_simplificado)
 
 datosBarrios$cerca_basural <- apply(datosBarrios, 1, unificar_basural)
 
