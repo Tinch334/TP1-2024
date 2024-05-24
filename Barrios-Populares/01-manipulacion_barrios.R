@@ -13,6 +13,9 @@ names(datosBarrios)[5] = "num_integrantes_vivienda"
 names(datosBarrios)[10] = "cant_menores_de_edad_del_hogar"
 names(datosBarrios)[12] = "num_ambientes_usados_como_dormitorio"
 names(datosBarrios)[13] = "num_max_pers_duermen_por_dormitorio"
+
+names(datosBarrios)[20] = "precio_alquiler"
+
 names(datosBarrios)[92] = "cucas"
 names(datosBarrios)[93] = "mosquitos"
 names(datosBarrios)[94] = "ratas"
@@ -21,7 +24,7 @@ names(datosBarrios)[115] = "forma_eliminacion_residuos"
 names(datosBarrios)[116] = "frec_recoleccion_basura_municipal"
 
 
-# Crear una función para combinar las plagas en una única columna
+# combinar las plagas en una única columna
 unificar_plagas <- function(row) {
   plagas <- c()
   
@@ -42,7 +45,7 @@ unificar_plagas <- function(row) {
   }
 }
 
-# Crear una función para combinar si una familia tiene plagas o no
+# combinar la condicion si una familia tiene plagas o no
 unificar_plagas_numerico <- function(row) {
   if (row["presencia_plagas"] == "No tiene plagas") {
     return(0)
@@ -62,11 +65,14 @@ unificar_plagas_simplificado <- function(row) {
 }
 
 unificar_basural <- function(row) {
-  if (row["basural_cerca"] != "No") {
-    return("No")
+  if (row["basural_cerca"] == "Sí, a menos de 500 metros") {
+    return("menor a 0.5")
+  }
+  else if (row["basural_cerca"] == "Sí, a más de 500 metros y menos de 2 kilómetros"){
+    return("0.5-2")
   }
   else {
-    return("Si")
+    return("mayor a 2")
   }
 }
 
@@ -85,6 +91,19 @@ freq_recoleccion_a_dias <- function(row) {
   }
 }
 
+freq_recoleccion_simplificado <- function(valor) {
+  if (valor == "No hay servicio de recolección municipal") {
+    return("no posee")
+  } else if (valor == "Una vez a la semana") {
+    return("1")
+  } else if (valor == "Entre 2 y 4 veces a la semana") {
+    return("2-4")
+  } else if (valor == "Al menos 5 veces a la semana") {
+    return("+5")
+  } else {
+    return(valor)
+  }
+}
 
 # aplicar funcion a cada columna del df
 datosBarrios$presencia_plagas <- apply(datosBarrios, 1, unificar_plagas)
@@ -93,28 +112,30 @@ datosBarrios$presencia_plagas_simplificado <- apply(datosBarrios, 1, unificar_pl
 
 datosBarrios$cerca_basural <- apply(datosBarrios, 1, unificar_basural)
 
+# ordenar labels
+datosBarrios$cerca_basural <- factor(datosBarrios$cerca_basural, 
+                                               levels = c("menor a 0.5", "0.5-2", "mayor a 2"))
+
+
 contar_plagas <- function(plaga, datos) {
   ocurrencias <- str_count(datos$presencia_plagas, plaga)
   return(sum(ocurrencias))
 }
 
-# Contar las ocurrencias de cada plaga
+# contar las ocurrencias de cada plaga
 cucarachas_cant <- contar_plagas("Cucarachas", datosBarrios)
 mosquitos_cant <- contar_plagas("Mosquitos", datosBarrios)
 ratas_cant <- contar_plagas("Ratas", datosBarrios)
 
-# Crear un dataframe con los resultados
+# guardar resultados en el dataframe
 plagas_acumuladas <- data.frame(
   Plaga = c("Cucarachas", "Mosquitos", "Ratas"),
   Cantidad = c(cucarachas_cant, mosquitos_cant, ratas_cant)
 )
 
-# Mostrar el dataframe
+
 #View(plagas_acumuladas)
 
-# (para corroborar que se cuentan correctamente)
-#cantidad_palabra <- sum(grepl("Cucarachas", datosBarrios$cucas))
-#print(cantidad_palabra)
 
 apariciones_cadena <- function(df, columna, cadena) {
   # Contar la cantidad de veces que aparece la palabra en la columna
@@ -156,10 +177,6 @@ plagas_y_recoleccion <- data.frame(
   CantidadPlagas = datosBarrios$presencia_plagas_numerico,
   FreqRecoleccion = datosBarrios$recoleccion_residuos_en_dias
 )
-# plagas_y_recoleccion <- data.frame(
-#   CantidadPlagas = c(0, 0, 0, 0, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3),
-#   FreqRecoleccion = c(1, 3, 3, 3, 3, 6, 6, 1, 3, 1, 1, 3, 3, 1, 6, 6, 3, 1, 1)
-# )
 
 #View(plagas_y_recoleccion)
 
@@ -188,5 +205,23 @@ datosBarrios$tipo_hacinamiento <- cut(datosBarrios$promedio_personas_por_habitac
                                       labels = c("no posee", "moderado", "crítico"),
                                       right = TRUE)
 
+
+
+plagas_y_recoleccion <- data.frame(
+  CantidadPlagas = datosBarrios$presencia_plagas_numerico,
+  FreqRecoleccion = datosBarrios$frec_recoleccion_basura_municipal
+)
+
+plagas_y_recoleccion$FreqRecoleccion <- sapply(plagas_y_recoleccion$FreqRecoleccion, freq_recoleccion_simplificado)
+
+
+# ordenar labels
+plagas_y_recoleccion$FreqRecoleccion <- factor(plagas_y_recoleccion$FreqRecoleccion, 
+                                               levels = c("no posee", "1", "2-4", "+5"))
+
+# nos deshacemos de las celdas de familias que no han contestado (o en su defecto, no pagan alquiler)
+datos_alquiler <- datosBarrios[!is.na(datosBarrios$precio_alquiler), ]
+
+print(plagas_y_recoleccion)
 View(datosBarrios)
 

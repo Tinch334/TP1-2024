@@ -8,4 +8,9 @@ ggsave("Barrios-Populares/graficos/graficaMenoresVivienda.png", graficaMenoresPo
 ggsave("Barrios-Populares/graficos/graficaFamiliaPoseeRMuni.png", graficaFamiliaPoseeRMuni)
 ggsave("Barrios-Populares/graficos/graficaRelPlagasCieloAbierto.png", graficaRelPlagasCieloAbierto)
 ggsave("Barrios-Populares/graficos/graficaEliminacionPropiaResiduos.png", graficaEliminacionPropiaResiduos)
-ggsave("Barrios-Populares/graficos/graficaPlagasYRecoleccion.png", graficaPlagasYRecoleccion)
+ggsave("Barrios-Populares/graficos/graficaCantPlagasSegunRec.png", graficaCantPlagasSegunRec)
+ggsave("Barrios-Populares/graficos/graficaPrecioAlquilerSegunCantPlagas.png", graficaPrecioAlquilerSegunCantPlagas)
+
+
+#ggsave("Barrios-Populares/graficos/graficaPlagasYRecoleccion.png", graficaPlagasYRecoleccion)
+
